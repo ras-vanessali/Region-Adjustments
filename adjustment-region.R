@@ -17,8 +17,8 @@ HI_AK_fact = 1.05
 
 MoM_limit = 0.03
 
-setwd("H:/Projects/40_GeoAnalysis/201912")
-Regionfile = '20190911 RegionManagement.xlsx'
+setwd("C:/Users/vanessa.li/Documents/GitHub/Region-Adjustments")
+Regionfile = '20190911RegionManagement.xlsx'
 
 loadFile<-paste('RegionAdjusters',format(Sys.time(), "%Y%m%d%H%M"),'VL.csv',sep='')
 
@@ -188,8 +188,8 @@ transLastM<-spread(as.data.frame(lastMonthAdj),Region,RegionAdjustment) %>%
 ### build a function to do MoM limitation
 
 MoMlimit_region <- function(last_month,current_month,limit){
-  upline = last_month + MoM_limit
-  btline = last_month - MoM_limit
+  upline = last_month + limit
+  btline = last_month - limit
   result = ifelse(is.na(last_month),current_month,pmin(upline,pmax(btline,current_month)))
   return(result)
 }
@@ -520,6 +520,6 @@ sharepage2 <-MoMlimst %>%
 
 ## write the file into folder to upload
 write.csv(fileUpload,loadFile,row.names = F)
-write.csv(sharepage1,paste(Sys.Date(),'MoMSharePage1_Canada.csv'),row.names = F)
-write.csv(sharepage2,paste(Sys.Date(),'MoMSharePage2_Canada.csv'),row.names = F)
+write.csv(sharepage1,paste(Sys.Date(),'MoMSharePage1.csv'),row.names = F)
+write.csv(sharepage2,paste(Sys.Date(),'MoMSharePage2.csv'),row.names = F)
 
