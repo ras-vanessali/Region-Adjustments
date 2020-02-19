@@ -54,7 +54,7 @@ output the exponential of the coefficients and the number of sales in each sched
 a) find the median of SP/M1Flv instead of fitting regression
 b) muting the factor by 1/3 and cap it by 3%
 c) applied the factor to closet region:
-`f(AK) = NW * 1.05 * factor_AK `
-`f(HI) = W* 1.05 * factor_HI `
+```f(AK) = NW * 1.05 * factor_AK ```
+```f(HI) = W* 1.05 * factor_HI ```
 
 8) Limit the adjusters by last month adjusters by 3% points.
