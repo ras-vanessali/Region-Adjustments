@@ -56,6 +56,7 @@ SELECT [CategoryId]
 			--		   When [LocationState] in ('MS','TN','AL','GA','SC','VA','NC','FL') Then 'SE' --8
 			--		   ELSE 'NOT OK' END AS [Region] 
 			,RMIP.[Region]
+			,BIC.LocationState
 			,Year([M1AppraisalBookPublishDate]) - ModelYear + (Month([M1AppraisalBookPublishDate])-6)/12.0000 AS Age
   
 			  ,[SalePriceSF]/M1PrecedingFLV as Y
@@ -67,13 +68,14 @@ SELECT [CategoryId]
 			--		   'WA','OR','ID','UT','MT','WY','CO','ND','PA','NY','VT','ME','NH','MA','CT',
 			--		   'MS','TN','AL','GA','SC','VA','NC','FL','RI','NJ','MD','DC','DE','NM','TX','LA','AR','OK')               
 			 AND Categoryid in (6,	14,	15,	29,	313,	315,	316,	360,	362,	451,	453,	2509,	2515,	2614,	2616)
-			  AND MakeId NOT in (58137,78,14086) --Miscellaneous,Not Attributed,Various
+			  AND MakeId NOT in (58137,78) --Miscellaneous,Not Attributed
               AND RMIP.[CountryCode]='USA'
 			 And [SalePrice]>3  And [M1PrecedingFLV]>3 and [SaleDate]>@SD_Start and [SaleDate]<=@SD_End
 			 AND Modelyear between 2008 and 2020           
 			 AND [SalePriceSF]/M1PrecedingFLV>0.5 AND [SalePriceSF]/M1PrecedingFLV<2      
-			 AND M1PrecedingABCost is not NULL
+			 AND M1PrecedingABCostUSNA is not NULL
        AND Option15 is NULL      
+   
                ")
 
 
@@ -107,13 +109,13 @@ SELECT
     ,[CurrencyCode]
     ,[SalePriceUSD]
 	  ,SalePriceSF
-    ,[CurrentABCost]
+    ,[CurrentABCostUSNA]
     ,[M1SFUsage]
     ,[M1AppraisalBookPublishDate]
     ,[LocationState]
     ,BIAS.[CountryCode]
     ,[M1PrecedingFlv]
-  	,M1PrecedingABCost
+  	,M1PrecedingABCostUSNA
    ,Year([M1AppraisalBookPublishDate]) - ModelYear + (Month([M1AppraisalBookPublishDate])-6)/12.0000 AS Age
     
 	INTO #Dataset
@@ -123,9 +125,9 @@ SELECT
     AND Modelyear between 2008 and 2020
     AND SaleDate > @StartDate AND SaleDate<= @EndDate
     AND CategoryId in (6,	15,	29,	315,451,362,360,2509,313,316)
-    AND [M1PrecedingFlv] >0
-    AND SalePrice>10			
-    AND M1PrecedingABCost is not NULL
+    AND [M1PrecedingFlv] >3
+    AND SalePrice>3			
+    AND M1PrecedingABCostUSNA is not NULL
 					
 DROP TABLE IF EXISTS #ETV					
  SELECT [CategoryId]
@@ -136,14 +138,14 @@ DROP TABLE IF EXISTS #ETV
 ,[ModelYear]
 ,[FLVSchedulePercentageCanadian]
 INTO #ETV
-FROM [ras_sas].[BI].[AppraisalBookEquipmentTypeValues] 
-where Modelyear between 2010 and 2019
+FROM [ras_sas].[BI].[AppraisalBookEquipmentTypeValuesUSNA] 
+where Modelyear between 2008 and 2020
 AND [AppraisalBookPublishDate] between @StartDate and @EffectiveDate
 AND CategoryId in (6,	15,	29,	315,451,362,360,2509,313,316) and  Makeid is not null
 
 
 
-SELECT salesTb.*, [FLVSchedulePercentageCanadian],(SalePriceUSD/ISNULL(M1SFUsage,1))/([FLVSchedulePercentageCanadian]*M1PrecedingABCost/100) as Y
+SELECT salesTb.*, [FLVSchedulePercentageCanadian],(SalePriceUSD/ISNULL(M1SFUsage,1))/([FLVSchedulePercentageCanadian]*M1PrecedingABCostUSNA/100) as Y
 FROM (select #Dataset.*, RMIP.Region from #Dataset
 inner join [ras_sas].[BI].[RegionMappingInProgressMKT] RMIP
 		  on #Dataset.LocationState = RMIP.[StateProvince]) salesTb			
