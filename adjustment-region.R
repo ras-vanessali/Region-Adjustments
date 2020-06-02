@@ -20,7 +20,7 @@ MoM_limit = 0.03
 setwd("C:/Users/vanessa.li/Documents/GitHub/Region-Adjustments")
 Regionfile = '20190911RegionManagement.xlsx'
 
-loadFile<-paste('RegionAdjusters',format(Sys.time(), "%Y%m%d%H%M"),'VL.csv',sep='')
+loadFile<-paste('RegionAdjusters',format(Sys.time(), "%Y%m%d%H%M"),'VL.xlsx',sep='')
 
 #connect<-'rasgcp'
 connect<-'production'
@@ -203,7 +203,7 @@ MoMlimit_region <- function(last_month,current_month,limit){
 ##################################################### USA ############################################################
 
 ### read the input file
-inputFeed_USA <- read_excel(Regionfile,sheet='InA')
+inputFeed_USA <- read.xlsx(Regionfile,sheetName='InA')
 
 ### join to the data 
 Catlevel_Cat<-subset(inputFeed_USA,inputFeed_USA$Level2 =='Category' & inputFeed_USA$SubcategoryId == "NULL")
@@ -301,7 +301,7 @@ GlobalUSA<-rownames_to_column(data.frame(matrix_global)) %>%
 
 
 
-Application_USA<-read_excel(Regionfile,sheet='OutA') %>%
+Application_USA<-read.xlsx(Regionfile,sheetName='OutA') %>%
   filter(Schedule !="") %>%
   select(Schedule,CategoryId,	CategoryName,SubcategoryId,SubcategoryName)
 
@@ -317,7 +317,7 @@ ExportTb_USA<- rbind(GlobalUSA,mergeTb_USA)
 ##################################################### CAN ############################################################
 
 ############### Read input mapping table #################
-inputFeed_CAN <- read_excel(Regionfile,sheet='InC')
+inputFeed_CAN <- read.xlsx(Regionfile,sheetName='InC')
 
 
 Data_model_CAN <- merge(CANregion,inputFeed_CAN, by=c("CategoryId"),all.x=T) %>%
@@ -411,7 +411,7 @@ GlobalCAN<-rownames_to_column(data.frame(matrix_global_CAN)) %>%
 
 
 
-Application_CAN<-read_excel(Regionfile,sheet='OutC') %>%
+Application_CAN<-read.xlsx(Regionfile,sheetName='OutC') %>%
   filter(Schedule !="") %>%
   select(Schedule,CategoryId,	CategoryName,SubcategoryId,SubcategoryName)
 
@@ -474,12 +474,16 @@ after_MoM <- MoMlimst %>%
 
 ### transfer the table and the upload file is ready 
 fileUpload <- gather(after_MoM, RegionCode,RegionAdjuster,GL:E,factor_key=T) %>%
-  mutate(MarketCode=MarketCode) %>%
+    mutate(MarketCode = MarketCode) %>%
   select(MarketCode, CountryCode, RegionCode, CategoryId, SubcategoryId, RegionAdjuster) %>%
+  mutate(RegionCode = as.factor(RegionCode),
+         CategoryId = as.integer(CategoryId),
+         SubcategoryId = as.integer(SubcategoryId),
+         RegionAdjuster = as.numeric(RegionAdjuster)) %>%
   filter(RegionAdjuster !='') %>%
   arrange(MarketCode, CountryCode, CategoryId, SubcategoryId)
 
-
+fileUpload[is.na(fileUpload)]<-''
 
 ### check if the otput file has right rows
 check_out<- fileUpload %>%
@@ -521,7 +525,7 @@ sharepage2 <-MoMlimst %>%
   arrange(CountryCode,Schedule,Category,Subcategory)
 
 ## write the file into folder to upload
-write.csv(fileUpload,loadFile,row.names = F)
-write.csv(sharepage1,paste(Sys.Date(),'MoMSharePage1.csv'),row.names = F)
-write.csv(sharepage2,paste(Sys.Date(),'MoMSharePage2.csv'),row.names = F)
+write.xlsx(fileUpload,loadFile,row.names = F,col.names=T)
+write.xlsx(sharepage1,paste(Sys.Date(),'MoMSharePage.xlsx'),sheetName = 'Sharepage1',row.names = F)
+write.xlsx(sharepage2,paste(Sys.Date(),'MoMSharePage.xlsx'),sheetName = 'Sharepage2',append=T, row.names = F)
 
