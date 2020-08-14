@@ -4,7 +4,8 @@ library(RODBC)
 library(dplyr)
 library(tibble)
 library(tidyr)
-library(readxl)
+#library(readxl)
+library(xlsx)
 
 ########################### * Define some variables used in following code ###########################################
 mutingFactor<-2/3
@@ -20,7 +21,7 @@ MoM_limit = 0.03
 setwd("C:/Users/vanessa.li/Documents/GitHub/Region-Adjustments")
 Regionfile = '20190911RegionManagement.xlsx'
 
-loadFile<-paste('RegionAdjusters',format(Sys.time(), "%Y%m%d%H%M"),'VL.xlsx',sep='')
+loadFile<-paste('RegionAdjusters',format(Sys.time(), "%Y%m%d%H%M"),'VL.csv',sep='')
 
 #connect<-'rasgcp'
 connect<-'production'
@@ -525,7 +526,7 @@ sharepage2 <-MoMlimst %>%
   arrange(CountryCode,Schedule,Category,Subcategory)
 
 ## write the file into folder to upload
-write.xlsx(fileUpload,loadFile,row.names = F,col.names=T)
+write.csv(fileUpload,loadFile,row.names = F)
 write.xlsx(sharepage1,paste(Sys.Date(),'MoMSharePage.xlsx'),sheetName = 'Sharepage1',row.names = F)
 write.xlsx(sharepage2,paste(Sys.Date(),'MoMSharePage.xlsx'),sheetName = 'Sharepage2',append=T, row.names = F)
 
